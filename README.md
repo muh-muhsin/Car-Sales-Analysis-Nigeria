@@ -69,6 +69,7 @@ To set up the project environment, follow these steps:
 All generated visualizations can be found in the `visualization/` folder.
 
 ## Author
+
 **Muhammad Muhsin Muhammad**  
 *Data Scientist & Web Developer*  
 - [LinkedIn](https://www.linkedin.com/in/muhsinmuhammad/)
