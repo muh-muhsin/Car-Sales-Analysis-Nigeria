@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Car Sales Dashboard</title>
+  <!-- Include Plotly.js CDN -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    /* General Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #e8f7f0; /* Icy green background */
+      color: #333;
+      line-height: 1.6;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    .upload-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    /* Chart Styles */
+    .chart {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 20px;
+      min-height: 350px; /* Ensure consistent height */
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.1); /* Glass morphism effect */
+      backdrop-filter: blur(10px); /* Glass morphism blur */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .chart h3 {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      margin: 0;
+      font-size: 16px;
+      color: #333;
+      font-weight: bold;
+    }
+    .tooltip {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      color: #333;
+      display: none; /* Hidden by default */
+    }
+    .chart:hover .tooltip {
+      display: block; /* Show tooltip on hover */
+    }
+
+    /* Color Scheme */
+    .highlight {
+      color: #1abc9c; /* Icy green for emphasis */
+      font-weight: bold;
+    }
+    .secondary {
+      color: #888; /* Gray for secondary elements */
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .dashboard {
+        grid-template-columns: 1fr; /* Single column layout for smaller screens */
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Interactive Car Sales Dashboard</h1>
+  <div class="upload-section">
+    <input type="file" id="jsonFileUpload" accept=".json" />
+    <p>Upload a JSON file containing car sales data.</p>
+  </div>
+  <div class="dashboard" id="dashboard">
+    <!-- Charts will be dynamically inserted here -->
+  </div>
+
+  <script>
+    // Function to parse uploaded JSON file
+    document.getElementById('jsonFileUpload').addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const jsonData = JSON.parse(e.target.result);
+          generateDashboard(jsonData);
+        } catch (error) {
+          alert('Invalid JSON file. Please upload a valid JSON file.');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Function to generate the dashboard
+    function generateDashboard(data) {
+      const dashboard = document.getElementById('dashboard');
+      dashboard.innerHTML = ''; // Clear previous charts
+
+      // Helper function to create a chart container
+      function createChart(title, plotData, layout, tooltipText) {
+        const div = document.createElement('div');
+        div.className = 'chart';
+        dashboard.appendChild(div);
+
+        const heading = document.createElement('h3');
+        heading.textContent = title;
+        div.appendChild(heading);
+
+        // Add tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = tooltipText;
+        div.appendChild(tooltip);
+
+        Plotly.newPlot(div, plotData, layout);
+      }
+
+      // 1. Price Distribution (Histogram)
+      const prices = data.map(car => car.Price);
+      createChart('Price Distribution', [{
+        x: prices,
+        type: 'histogram',
+        marker: { color: '#1abc9c' } /* Highlighted color */
+      }], {
+        title: 'Distribution of Car Prices',
+        xaxis: { title: 'Price (₦)', color: '#888' },
+        yaxis: { title: 'Frequency', color: '#888' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
+      }, `Average Price: ₦${Math.round(prices.reduce((a, b) => a + b, 0) / prices.length).toLocaleString()}`);
+
+      // 2. Brand Popularity (Bar Chart)
+      const brandCounts = {};
+      data.forEach(car => {
+        brandCounts[car.Brand] = (brandCounts[car.Brand] || 0) + 1;
+      });
+      const brands = Object.keys(brandCounts);
+      const counts = Object.values(brandCounts);
+      const totalListings = counts.reduce((a, b) => a + b, 0);
+      createChart('Brand Popularity', [{
+        x: brands,
+        y: counts,
+        type: 'bar',
+        marker: { color: '#1abc9c' } /* Highlighted color */
+      }], {
+        title: 'Popularity of Car Brands',
+        xaxis: { title: 'Brand', color: '#888' },
+        yaxis: { title: 'Number of Listings', color: '#888' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
+      }, `Top Brand: ${brands[counts.indexOf(Math.max(...counts))]} (${Math.round(Math.max(...counts) / totalListings * 100)}%)`);
+
+      // 3. Year of Manufacture vs. Price (Scatter Plot)
+      const years = data.map(car => car.Year);
+      createChart('Year of Manufacture vs. Price', [{
+        x: years,
+        y: prices,
+        mode: 'markers',
+        marker: { color: '#1abc9c', size: 8 } /* Highlighted color */
+      }], {
+        title: 'Year of Manufacture vs. Price',
+        xaxis: { title: 'Year', color: '#888' },
+        yaxis: { title: 'Price (₦)', color: '#888' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
+      }, `Oldest Car: ${Math.min(...years)}, Newest Car: ${Math.max(...years)}`);
+
+      // 4. Mileage vs. Price (Scatter Plot)
+      const mileages = data.map(car => car.Mileage);
+      createChart('Mileage vs. Price', [{
+        x: mileages,
+        y: prices,
+        mode: 'markers',
+        marker: { color: '#1abc9c', size: 8 } /* Highlighted color */
+      }], {
+        title: 'Mileage vs. Price',
+        xaxis: { title: 'Mileage (km)', color: '#888' },
+        yaxis: { title: 'Price (₦)', color: '#888' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
+      }, `Average Mileage: ${Math.round(mileages.reduce((a, b) => a + b, 0) / mileages.length).toLocaleString()} km`);
+
+      // 5. Regional Analysis (Bar Chart)
+      const regionCounts = {};
+      data.forEach(car => {
+        regionCounts[car.Region] = (regionCounts[car.Region] || 0) + 1;
+      });
+      const regions = Object.keys(regionCounts);
+      const regionCountsValues = Object.values(regionCounts);
+      const totalRegionalListings = regionCountsValues.reduce((a, b) => a + b, 0);
+      createChart('Regional Analysis', [{
+        x: regions,
+        y: regionCountsValues,
+        type: 'bar',
+        marker: { color: '#1abc9c' } /* Highlighted color */
+      }], {
+        title: 'Car Listings by Region',
+        xaxis: { title: 'Region', color: '#888' },
+        yaxis: { title: 'Number of Listings', color: '#888' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
+      }, `Top Region: ${regions[regionCountsValues.indexOf(Math.max(...regionCountsValues))]} (${Math.round(Math.max(...regionCountsValues) / totalRegionalListings * 100)}%)`);
+
+      // 6. Condition Breakdown (Pie Chart)
+      const conditionCounts = {};
+      data.forEach(car => {
+        conditionCounts[car.Condition] = (conditionCounts[car.Condition] || 0) + 1;
+      });
+      const conditions = Object.keys(conditionCounts);
+      const conditionValues = Object.values(conditionCounts);
+      createChart('Condition Breakdown', [{
+        values: conditionValues,
+        labels: conditions,
+        type: 'pie',
+        marker: { colors: ['#1abc9c', '#888'] } /* Highlighted and secondary colors */
+      }], {
+        title: 'Condition Breakdown',
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
+      }, `Used Cars: ${Math.round(conditionValues[conditions.indexOf('Local Used')] / conditionValues.reduce((a, b) => a + b, 0) * 100)}%`);
+
+      // 7. Color Preferences (Bar Chart)
+      const colorCounts = {};
+      data.forEach(car => {
+        colorCounts[car.Color] = (colorCounts[car.Color] || 0) + 1;
+      });
+      const colors = Object.keys(colorCounts);
+      const colorValues = Object.values(colorCounts);
+      createChart('Color Preferences', [{
+        x: colors,
+        y: colorValues,
+        type: 'bar',
+        marker: { color: '#1abc9c' } /* Highlighted color */
+      }], {
+        title: 'Color Preferences',
+        xaxis: { title: 'Color', color: '#888' },
+        yaxis: { title: 'Number of Listings', color: '#888' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
+      }, `Most Popular Color: ${colors[colorValues.indexOf(Math.max(...colorValues))]} (${Math.round(Math.max(...colorValues) / colorValues.reduce((a, b) => a + b, 0) * 100)}%)`);
+
+      // 8. Top Models by Brand (Horizontal Bar Chart)
+      const modelCounts = {};
+      data.forEach(car => {
+        const key = `${car.Brand} - ${car['Car Name']}`;
+        modelCounts[key] = (modelCounts[key] || 0) + 1;
+      });
+      const sortedModels = Object.entries(modelCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      const topModels = sortedModels.map(entry => entry[0]);
+      const topModelCounts = sortedModels.map(entry => entry[1]);
+      createChart('Top Models by Brand', [{
+        y: topModels,
+        x: topModelCounts,
+        type: 'bar',
+        orientation: 'h',
+        marker: { color: '#1abc9c' } /* Highlighted color */
+      }], {
+        title: 'Top 10 Models by Brand',
+        xaxis: { title: 'Number of Listings', color: '#888' },
+        yaxis: { title: 'Model', color: '#888' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
+      }, `Top Model: ${topModels[0]} (${Math.round(topModelCounts[0] / topModelCounts.reduce((a, b) => a + b, 0) * 100)}%)`);
+    }
+  </script>
+</body>
+</html>
