@@ -4,8 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { 
-  Bars3Icon, 
+import {
+  Bars3Icon,
   XMarkIcon,
   UserCircleIcon,
   ChartBarIcon,
@@ -85,7 +85,7 @@ export function Header() {
                 >
                   <UserCircleIcon className="h-5 w-5" />
                   <span className="hidden sm:block">
-                    {userSession.profile?.name || 
+                    {userSession.profile?.name ||
                      `${userSession.loadUserData().profile.stxAddress.testnet.slice(0, 6)}...${userSession.loadUserData().profile.stxAddress.testnet.slice(-4)}`}
                   </span>
                   <Badge variant="success" className="hidden sm:inline-flex">
@@ -108,6 +108,14 @@ export function Header() {
                     >
                       <UserCircleIcon className="mr-3 h-4 w-4" />
                       Dashboard
+                    </Link>
+                    <Link
+                      href="/analytics"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <ChartBarIcon className="mr-3 h-4 w-4" />
+                      Analytics
                     </Link>
                     <Link
                       href="/upload"
