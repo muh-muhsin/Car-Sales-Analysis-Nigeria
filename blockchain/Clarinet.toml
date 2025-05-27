@@ -1,0 +1,87 @@
+[project]
+name = "cars360"
+description = "Decentralized car sales data marketplace on Stacks blockchain"
+authors = ["Muhammad Muhsin Muhammad <muhsin@cars360.ng>"]
+telemetry = true
+cache_dir = "./.clarinet"
+
+[contracts.dataset-registry]
+path = "contracts/dataset-registry.clar"
+clarity_version = 2
+epoch = 2.4
+
+[contracts.marketplace]
+path = "contracts/marketplace.clar"
+clarity_version = 2
+epoch = 2.4
+
+[contracts.access-control]
+path = "contracts/access-control.clar"
+clarity_version = 2
+epoch = 2.4
+
+[repl]
+costs_version = 2
+parser_version = 2
+
+[repl.analysis]
+passes = ["check_checker"]
+
+[[repl.analysis.check_checker.passes]]
+pass = "check_checker"
+
+[devnet]
+disable_bitcoin_explorer = false
+working_dir = "tmp/devnet"
+use_docker_gateway_routing = false
+
+[devnet.bitcoin_node]
+username = "devnet"
+password = "devnet"
+rpc_port = 18443
+p2p_port = 18444
+
+[devnet.stacks_node]
+rpc_port = 20443
+p2p_port = 20444
+seed = "replace-with-your-own-seed-when-deploying-to-mainnet"
+miner_mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+bitcoin_peer_port = 18444
+bitcoin_peer_host = "127.0.0.1"
+bitcoin_rpc_port = 18443
+bitcoin_rpc_username = "devnet"
+bitcoin_rpc_password = "devnet"
+bitcoin_rpc_host = "127.0.0.1"
+working_dir = "tmp/devnet"
+wait_time_for_microblocks = 10000
+
+[[devnet.pox_stacking_orders]]
+start_at_cycle = 3
+duration = 12
+wallet = "wallet_1"
+slots = 2
+btc_address = "mr1iPkD9N3RJZZxXRk7xF9d36gffa6exNC"
+
+[[devnet.pox_stacking_orders]]
+start_at_cycle = 3
+duration = 6
+wallet = "wallet_2"
+slots = 1
+btc_address = "muYdXKmX9bByAueDe6KFfHd5Ff1gdN9ErG"
+
+[devnet.orchestrator]
+node_logs_location = "tmp/devnet/logs/bitcoin-node.log"
+postgres_port = 5432
+postgres_username = "postgres"
+postgres_password = "postgres"
+postgres_database = "stacks_blockchain_api"
+bitcoin_controller_block_time = 30_000
+
+[testnet]
+stacks_node_rpc_address = "https://api.testnet.hiro.so"
+bitcoin_node_rpc_address = "https://blockstream.info/testnet/api"
+bitcoin_node_p2p_address = "testnet3.bitcoin.nodes.hiro.so:18333"
+
+[mainnet]
+stacks_node_rpc_address = "https://api.hiro.so"
+bitcoin_node_rpc_address = "https://blockstream.info/api"

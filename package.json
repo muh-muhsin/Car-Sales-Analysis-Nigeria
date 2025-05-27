@@ -1,0 +1,77 @@
+{
+  "name": "cars360",
+  "version": "1.0.0",
+  "description": "Cars360 - A Decentralized Marketplace for Nigerian Car Sales Data Built on Stacks Blockchain",
+  "author": {
+    "name": "Muhammad Muhsin Muhammad",
+    "email": "muhammad.m1601550@st.futminna.edu.ng",
+    "url": "https://github.com/muhsinmuhammad"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/muhsinmuhammad/Cars360.git"
+  },
+  "homepage": "https://cars360.ng",
+  "bugs": {
+    "url": "https://github.com/muhsinmuhammad/Cars360/issues"
+  },
+  "keywords": [
+    "blockchain",
+    "stacks",
+    "web3",
+    "marketplace",
+    "nigeria",
+    "automotive",
+    "data",
+    "decentralized",
+    "smart-contracts",
+    "ipfs"
+  ],
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "setup": "npm run setup:frontend && npm run setup:backend",
+    "setup:frontend": "cd frontend && npm install",
+    "setup:backend": "cd backend && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && source venv/bin/activate && uvicorn main:app --reload",
+    "dev:blockchain": "cd blockchain && clarinet devnet start",
+    "build": "npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:frontend && npm run test:backend && npm run test:contracts",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && source venv/bin/activate && pytest",
+    "test:contracts": "cd blockchain && clarinet test",
+    "test:e2e": "cd frontend && npm run test:e2e",
+    "lint": "npm run lint:frontend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "type-check": "cd frontend && npm run type-check",
+    "clean": "npm run clean:frontend && npm run clean:backend",
+    "clean:frontend": "cd frontend && rm -rf .next node_modules",
+    "clean:backend": "cd backend && rm -rf __pycache__ .pytest_cache",
+    "deploy": "npm run build && npm run deploy:production",
+    "deploy:production": "echo 'Deploy to production server'",
+    "docs": "echo 'Generate documentation'",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0",
+    "python": ">=3.9.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ]
+}

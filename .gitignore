@@ -1,0 +1,256 @@
+# Cars360 - Decentralized Car Data Marketplace
+# .gitignore file for comprehensive project exclusions
+
+# ================================
+# Environment & Configuration
+# ================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.example.backup
+
+# ================================
+# Dependencies & Packages
+# ================================
+node_modules/
+*/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# ================================
+# Build Outputs & Artifacts
+# ================================
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Production builds
+*.tgz
+*.tar.gz
+
+# ================================
+# Development & IDE
+# ================================
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ================================
+# Operating System
+# ================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# ================================
+# Logs & Debugging
+# ================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output/
+
+# ================================
+# Database & Storage
+# ================================
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# PostgreSQL
+*.dump
+
+# Uploads and temporary files
+uploads/
+temp/
+tmp/
+*.tmp
+
+# ================================
+# Blockchain & Web3
+# ================================
+# Clarinet
+.clarinet/
+clarinet.toml.backup
+
+# Wallet files (NEVER commit private keys)
+*.wallet
+*.keystore
+private-keys/
+secrets/
+
+# ================================
+# Testing
+# ================================
+# Jest
+coverage/
+.nyc_output/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ================================
+# Caching
+# ================================
+# Next.js
+.next/
+.swc/
+
+# Turbo
+.turbo/
+
+# Vercel
+.vercel/
+
+# Redis
+dump.rdb
+
+# ================================
+# Documentation
+# ================================
+# Ignore generated docs (keep source docs)
+docs/generated/
+*.pdf
+
+# ================================
+# Miscellaneous
+# ================================
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Package manager locks (keep one, remove others if needed)
+# yarn.lock
+# pnpm-lock.yaml
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# Compressed files
+*.zip
+*.rar
+*.7z
+
+# ================================
+# Project Specific
+# ================================
+# Cars360 specific exclusions
+data/raw/
+data/processed/
+data/temp/
+analytics/cache/
+blockchain/deployments/testnet/
+blockchain/deployments/mainnet/
+
+# API keys and sensitive data
+api-keys.json
+credentials.json
+service-account.json
+
+# Local development overrides
+docker-compose.override.yml
+.env.override
