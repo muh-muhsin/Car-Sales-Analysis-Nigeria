@@ -30,21 +30,21 @@ async def get_marketplace_stats(
         total_datasets = db.query(Dataset).filter(Dataset.is_active == True).count()
         total_users = db.query(User).filter(User.is_active == True).count()
         total_transactions = db.query(DatasetAccess).count()
-        
+
         # Revenue statistics
         total_revenue = db.query(func.sum(DatasetAccess.price_paid)).scalar() or 0
-        
+
         # Recent activity (last 30 days)
         thirty_days_ago = datetime.utcnow() - timedelta(days=30)
         recent_datasets = db.query(Dataset).filter(
             Dataset.created_at >= thirty_days_ago,
             Dataset.is_active == True
         ).count()
-        
+
         recent_transactions = db.query(DatasetAccess).filter(
             DatasetAccess.created_at >= thirty_days_ago
         ).count()
-        
+
         # Top datasets by sales
         top_datasets = db.query(
             Dataset.id,
@@ -54,7 +54,7 @@ async def get_marketplace_stats(
         ).filter(
             Dataset.is_active == True
         ).order_by(desc(Dataset.total_sales)).limit(5).all()
-        
+
         # Top sellers
         top_sellers = db.query(
             User.id,
@@ -67,7 +67,7 @@ async def get_marketplace_stats(
             User.is_active == True,
             User.total_uploads > 0
         ).order_by(desc(User.total_earnings)).limit(5).all()
-        
+
         return {
             "overview": {
                 "total_datasets": total_datasets,
@@ -100,7 +100,7 @@ async def get_marketplace_stats(
                 for seller in top_sellers
             ]
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get marketplace stats: {e}")
         raise HTTPException(
@@ -117,7 +117,7 @@ async def get_price_trends(
     """Get price trends over time"""
     try:
         start_date = datetime.utcnow() - timedelta(days=days)
-        
+
         # Get daily average prices
         daily_prices = db.query(
             func.date(DatasetAccess.created_at).label('date'),
@@ -128,7 +128,7 @@ async def get_price_trends(
         ).group_by(
             func.date(DatasetAccess.created_at)
         ).order_by('date').all()
-        
+
         return {
             "price_trends": [
                 {
@@ -139,7 +139,7 @@ async def get_price_trends(
                 for trend in daily_prices
             ]
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get price trends: {e}")
         raise HTTPException(
@@ -159,17 +159,17 @@ async def get_category_distribution(
             Dataset.is_active == True,
             Dataset.tags.isnot(None)
         ).all()
-        
+
         # Count tag occurrences
         tag_counts = {}
         for dataset in datasets:
             if dataset.tags:
                 for tag in dataset.tags:
                     tag_counts[tag] = tag_counts.get(tag, 0) + 1
-        
+
         # Sort by count
         sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
-        
+
         return {
             "categories": [
                 {
@@ -180,7 +180,7 @@ async def get_category_distribution(
                 for tag, count in sorted_tags[:10]  # Top 10 categories
             ]
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get category distribution: {e}")
         raise HTTPException(
@@ -203,7 +203,7 @@ async def get_quality_metrics(
             (60, 69, "Poor"),
             (0, 59, "Very Poor")
         ]
-        
+
         quality_distribution = []
         for min_score, max_score, label in quality_ranges:
             count = db.query(Dataset).filter(
@@ -211,18 +211,18 @@ async def get_quality_metrics(
                 Dataset.quality_score >= min_score,
                 Dataset.quality_score <= max_score
             ).count()
-            
+
             quality_distribution.append({
                 "range": f"{min_score}-{max_score}",
                 "label": label,
                 "count": count
             })
-        
+
         # Average quality score
         avg_quality = db.query(func.avg(Dataset.quality_score)).filter(
             Dataset.is_active == True
         ).scalar() or 0
-        
+
         # Rating distribution
         rating_distribution = []
         for rating in range(1, 6):
@@ -231,18 +231,18 @@ async def get_quality_metrics(
                 Dataset.average_rating >= rating,
                 Dataset.average_rating < rating + 1
             ).count()
-            
+
             rating_distribution.append({
                 "rating": rating,
                 "count": count
             })
-        
+
         return {
             "quality_distribution": quality_distribution,
             "average_quality_score": round(float(avg_quality), 2),
             "rating_distribution": rating_distribution
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get quality metrics: {e}")
         raise HTTPException(
@@ -259,7 +259,7 @@ async def get_user_activity(
     """Get user activity metrics"""
     try:
         start_date = datetime.utcnow() - timedelta(days=days)
-        
+
         # New users over time
         daily_signups = db.query(
             func.date(User.created_at).label('date'),
@@ -270,15 +270,15 @@ async def get_user_activity(
         ).group_by(
             func.date(User.created_at)
         ).order_by('date').all()
-        
+
         # Active users (users who made transactions)
         active_users = db.query(func.count(func.distinct(DatasetAccess.user_id))).filter(
             DatasetAccess.created_at >= start_date
         ).scalar() or 0
-        
+
         # User engagement metrics
         total_active_users = db.query(User).filter(User.is_active == True).count()
-        
+
         return {
             "daily_signups": [
                 {
@@ -291,10 +291,84 @@ async def get_user_activity(
             "total_active_users": total_active_users,
             "engagement_rate": round((active_users / total_active_users) * 100, 2) if total_active_users > 0 else 0
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get user activity: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve user activity"
+        )
+
+
+@router.get("/market-data")
+async def get_market_data(
+    time_range: str = "30d",
+    state: str = "all",
+    brand: str = "all",
+    db: Session = Depends(get_db)
+):
+    """Get comprehensive Nigerian car market analytics data"""
+    try:
+        # Parse time range
+        days_map = {"7d": 7, "30d": 30, "90d": 90, "1y": 365}
+        days = days_map.get(time_range, 30)
+        start_date = datetime.utcnow() - timedelta(days=days)
+
+        # Mock data for development - replace with actual database queries
+        mock_data = {
+            "overview": {
+                "totalListings": 2650,
+                "averagePrice": 4200000,
+                "priceChange": 5.2,
+                "mostPopularBrand": "toyota",
+                "mostActiveState": "lagos"
+            },
+            "priceData": [
+                {"date": "2024-01-01", "averagePrice": 4000000, "volume": 120},
+                {"date": "2024-01-08", "averagePrice": 4100000, "volume": 135},
+                {"date": "2024-01-15", "averagePrice": 4150000, "volume": 142},
+                {"date": "2024-01-22", "averagePrice": 4200000, "volume": 158},
+            ],
+            "brandData": [
+                {"brand": "Toyota", "count": 856, "averagePrice": 3800000, "marketShare": 32.3},
+                {"brand": "Honda", "count": 495, "averagePrice": 4200000, "marketShare": 18.7},
+                {"brand": "Mercedes-Benz", "count": 326, "averagePrice": 8500000, "marketShare": 12.3},
+                {"brand": "BMW", "count": 236, "averagePrice": 7200000, "marketShare": 8.9},
+                {"brand": "Hyundai", "count": 164, "averagePrice": 2800000, "marketShare": 6.2},
+            ],
+            "locationData": [
+                {"state": "Lagos", "count": 1193, "averagePrice": 4500000, "coordinates": [6.5244, 3.3792]},
+                {"state": "Abuja", "count": 610, "averagePrice": 4800000, "coordinates": [9.0765, 7.3986]},
+                {"state": "Rivers", "count": 212, "averagePrice": 3900000, "coordinates": [4.8156, 7.0498]},
+                {"state": "Oyo", "count": 186, "averagePrice": 3600000, "coordinates": [8.0000, 4.0000]},
+                {"state": "Kano", "count": 159, "averagePrice": 3200000, "coordinates": [12.0022, 8.5920]},
+            ],
+            "trends": {
+                "priceDirection": "up",
+                "volumeDirection": "up",
+                "topGrowingBrands": ["Hyundai", "Kia", "Mazda"],
+                "emergingMarkets": ["Plateau", "Enugu", "Delta"]
+            }
+        }
+
+        # Apply filters to mock data
+        if state != "all":
+            mock_data["locationData"] = [
+                loc for loc in mock_data["locationData"]
+                if loc["state"].lower() == state.lower()
+            ]
+
+        if brand != "all":
+            mock_data["brandData"] = [
+                b for b in mock_data["brandData"]
+                if b["brand"].lower() == brand.lower()
+            ]
+
+        return mock_data
+
+    except Exception as e:
+        logger.error(f"Failed to get market data: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve market data"
         )
